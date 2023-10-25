@@ -33,7 +33,7 @@ namespace ProjetoEscola_API.Controllers
         {
             var user = _context.Usuario.Where(u => u.username == usuario.username &&
 
-            u.password == usuario.password).FirstOrDefault();
+            u.senha == usuario.senha).FirstOrDefault();
 
             if (user == null)
                 return Unauthorized("Usuário ou senha inválidos");
@@ -41,9 +41,9 @@ namespace ProjetoEscola_API.Controllers
                 new Claim(ClaimTypes.Name, user.username),
                 new Claim(ClaimTypes.Role, user.role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            };
+};
             var token = GetToken(authClaims);
-            user.password = "";
+            user.senha = "";
             return Ok(new
             {
                 token = new JwtSecurityTokenHandler().WriteToken(token),
@@ -58,16 +58,18 @@ namespace ProjetoEscola_API.Controllers
         [HttpGet]
         [Route("authenticated")]
         [Authorize]
-        public string Authenticated() => String.Format("Autenticado - {0}",
-        User.Identity.Name);
+        public string Authenticated() => String.Format("Autenticado - {0}", User.Identity.Name);
+
         [HttpGet]
         [Route("aluno")]
         [Authorize(Roles = "aluno,professor")]
         public string Aluno() => "Aluno";
+        
         [HttpGet]
         [Route("professor")]
         [Authorize(Roles = "professor")]
         public string Professor() => "Professor";
+        
         private JwtSecurityToken GetToken(List<Claim> authClaims)
         {
             var authSigningKey = new
