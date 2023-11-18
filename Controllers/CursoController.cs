@@ -11,27 +11,26 @@ using ProjetoEscola_API.Models;
 namespace ProjetoEscola_API.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
-    public class AlunoController : ControllerBase
+    public class CursoController : ControllerBase   
     {
-
         private EscolaContext _context;
-        public AlunoController(EscolaContext context)
+
+        public CursoController(EscolaContext context)
         {
-            // construtor
             _context = context;
         }
+
         [HttpGet]
-        public ActionResult<List<Aluno>> GetAll()
-        {
-            return _context.Aluno.ToList();
+        public  ActionResult<List<Curso>> GetAllCursos(){
+            return _context.Curso.ToList();
         }
-        [HttpGet("{AlunoId}")]
-        public ActionResult<Aluno> Get(int AlunoId)
+
+        [HttpGet("{Id}")]
+        public ActionResult<Curso> Get(int Id)
         {
             try
             {
-                var result = _context.Aluno.Find(AlunoId);
+                var result = _context.Curso.Find(Id);
                 if (result == null)
                 {
                     return NotFound();
@@ -45,18 +44,18 @@ namespace ProjetoEscola_API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post(Aluno model)
+        public async Task<ActionResult> Post(Curso model)
         {
-            var userRa = _context.Aluno.Select(x => x.ra == model.ra);
+            var userRa = _context.Curso.Select(x => x.Id == model.Id);
             try
             {
                 if (userRa != null)
                 {
-                    _context.Aluno.Add(model);
+                    _context.Curso.Add(model);
                     if (await _context.SaveChangesAsync() == 1)
                     {
                         //return Ok();
-                        return Created($"/api/aluno/{model.ra}", model);
+                        return Created($"/api/curso/{model.Id}", model);
                     }
                 }           
             }
@@ -67,19 +66,20 @@ namespace ProjetoEscola_API.Controllers
             // retorna BadRequest se não conseguiu incluir
             return BadRequest();
         }
-        [HttpDelete("{AlunoId}")]
-        public async Task<ActionResult> Delete(int AlunoId)
+
+        [HttpDelete("{Id}")]
+        public async Task<ActionResult> Delete(int Id)
         {
             try
             {
                 //verifica se existe aluno a ser excluído
-                var aluno = await _context.Aluno.FindAsync(AlunoId);
-                if (aluno == null)
+                var curso = await _context.Curso.FindAsync(Id);
+                if (curso == null)
                 {
                     //método do EF
                     return NotFound();
                 }
-                _context.Remove(aluno);
+                _context.Remove(curso);
                 await _context.SaveChangesAsync();
                 return NoContent();
             }
@@ -88,22 +88,21 @@ namespace ProjetoEscola_API.Controllers
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Falha no acesso ao banco de dados.");
             }
         }
-        [HttpPut("{AlunoId}")]
-        public async Task<IActionResult> Put(int AlunoId, Aluno dadosCurso)
+        [HttpPut("{Id}")]
+        public async Task<IActionResult> Put(int Id, Curso dadosAlunoAlt)
         {
             try
             {
                 //verifica se existe aluno a ser alterado
-                var result = await _context.Aluno.FindAsync(AlunoId);
-                if (AlunoId != result.Id)
+                var result = await _context.Curso.FindAsync(Id);
+                if (Id != result.Id)
                 {
                     return BadRequest();
                 }
-                result.ra = dadosCurso.ra;
-                result.nome = dadosCurso.nome;
-                result.codCurso  = dadosCurso.codCurso;
+                result.CodCurso = dadosAlunoAlt.CodCurso;
+                result.NomeCurso = dadosAlunoAlt.NomeCurso;
                 await _context.SaveChangesAsync();
-                return Created($"/api/aluno/{dadosCurso.Id}", dadosCurso);
+                return Created($"/api/curso/{dadosAlunoAlt.Id}", dadosAlunoAlt);
             }
             catch
             {
